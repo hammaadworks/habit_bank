@@ -1,0 +1,22 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="fav_grad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0891B2"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Identical Outer Shape & Gradient -->
+  <rect width="32" height="32" rx="10" fill="url(#fav_grad)"/>
+  
+  <!-- Scaled Shield/Vault Door -->
+  <path d="M16 7L24 11V21L16 25L8 21V11L16 7Z" fill="white" fill-opacity="0.1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Scaled Kinetic Ledger Bars -->
+  <rect x="12" y="15" width="2" height="6" rx="0.5" fill="white"/>
+  <rect x="15" y="13" width="2" height="10" rx="0.5" fill="white"/>
+  <rect x="18" y="14" width="2" height="8" rx="0.5" fill="white"/>
+  
+  <!-- Scaled Center Node -->
+  <circle cx="16" cy="10" r="0.75" fill="white"/>
+</svg>

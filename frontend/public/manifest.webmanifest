@@ -1,0 +1,21 @@
+{
+  "name": "Habit Bank",
+  "short_name": "HabitBank",
+  "description": "A modern ledger for your identity and daily habits.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ECFEFF",
+  "theme_color": "#0891B2",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/logo.svg",
+      "sizes": "120x120",
+      "type": "image/svg+xml"
+    }
+  ]
+}
