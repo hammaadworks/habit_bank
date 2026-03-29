@@ -82,7 +82,7 @@ export function EditHabitModal({
               required
               value={formData.name}
               onChange={e => setFormData({...formData, name: e.target.value})}
-              className="w-full bg-white/50 border border-border rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-4 text-lg sm:text-xl font-bold font-heading focus:outline-none"
+              className="w-full bg-background border border-border rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-5 text-lg sm:text-xl font-black font-heading text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 shadow-inner"
             />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -101,20 +101,41 @@ export function EditHabitModal({
                 type="date"
                 value={formData.start_date}
                 onChange={e => setFormData({...formData, start_date: e.target.value})}
-                className="w-full bg-white/50 border border-border rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-4 text-base sm:text-lg font-bold focus:outline-none [color-scheme:light]"
+                className="w-full bg-background border border-border rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-5 text-base sm:text-lg font-black text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 shadow-inner [color-scheme:dark]"
               />
             </div>
           </div>
-          <div className="flex items-center gap-3 p-3 sm:p-4 bg-white/50 border border-border rounded-xl sm:rounded-2xl cursor-pointer hover:bg-white transition-all" onClick={() => setFormData({...formData, is_stacked: !formData.is_stacked})}>
-            <input 
-              type="checkbox"
-              checked={formData.is_stacked}
-              onChange={() => {}}
-              className="w-4 h-4 sm:w-5 sm:h-5 accent-primary cursor-pointer"
-            />
+          <div className="flex items-center gap-4 p-4 sm:p-5 bg-background border border-border rounded-xl sm:rounded-2xl cursor-pointer hover:bg-card hover:border-primary/50 transition-all shadow-md group" onClick={() => setFormData({...formData, is_stacked: !formData.is_stacked})}>
+            <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded flex items-center justify-center border-2 transition-colors ${formData.is_stacked ? 'bg-primary border-primary' : 'border-muted-foreground/30 group-hover:border-primary/50'}`}>
+              {formData.is_stacked && <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
+            </div>
             <div>
-              <p className="text-xs sm:text-sm font-bold">Stackable Module</p>
-              <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-widest">Exempt from daily quota</p>
+              <p className="text-sm sm:text-base font-black text-foreground">Stackable Module</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-widest font-bold">Exempt from daily quota</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid gap-1.5 sm:gap-2">
+              <label className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Frequency</label>
+              <select
+                value={formData.frequency_type}
+                onChange={e => setFormData({...formData, frequency_type: e.target.value})}
+                className="w-full bg-white/50 border border-border rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-4 text-base sm:text-lg font-bold focus:outline-none appearance-none cursor-pointer"
+              >
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+              </select>
+            </div>
+            <div className="grid gap-1.5 sm:gap-2">
+              <label className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Times per period</label>
+              <input 
+                type="number"
+                min="1"
+                value={formData.frequency_count}
+                onChange={e => setFormData({...formData, frequency_count: parseInt(e.target.value) || 1})}
+                className="w-full bg-white/50 border border-border rounded-xl sm:rounded-2xl px-4 sm:px-6 py-3 sm:py-4 text-base sm:text-lg font-bold focus:outline-none"
+              />
             </div>
           </div>
         </div>
@@ -235,7 +256,6 @@ export function EditHabitModal({
                 onCancel={onClose}
                 isSubmitting={submitting}
                 submitLabel="COMMIT_CHANGES"
-                backLabel="PREV"
                 cancelLabel="ABORT"
               />
               {error && (
@@ -366,3 +386,4 @@ export function EditHabitModal({
     </div>
   );
 }
+

@@ -3,22 +3,21 @@
 import { useState } from "react";
 import { 
   Home, 
-  BarChart2, 
   Settings, 
-  Target,
   LogOut,
   Star,
   MessageSquare,
   Menu,
   X,
-  PieChart
+  LineChart,
+  Bot
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "@/lib/utils";
 import { FeedbackModal } from "./FeedbackModal";
-import { DailySpectrumWidget } from "./DailySpectrumWidget";
 import { User, DashboardAgenda } from "../types";
 import { Logo } from "./Logo";
+import { DailySpectrumWidget } from "./DailySpectrumWidget";
 
 export function Sidebar({ 
   activeTab = "dashboard", 
@@ -45,8 +44,8 @@ export function Sidebar({
 
   const menuItems = [
     { id: "dashboard", icon: Home, label: "Dashboard" },
-    { id: "habits", icon: Target, label: "Habits" },
-    { id: "analytics", icon: BarChart2, label: "Analytics" },
+    { id: "analytics", icon: LineChart, label: "Analytics" },
+    { id: "assistant", icon: Bot, label: "AI Assistant" },
     { id: "settings", icon: Settings, label: "Settings" },
   ];
 
@@ -60,7 +59,7 @@ export function Sidebar({
       {/* Mobile Toggle */}
       <button 
         onClick={() => setIsMobileOpen(!isMobileOpen)}
-        className="fixed top-6 left-6 z-[60] md:hidden p-3 bg-white/80 backdrop-blur-xl border border-border rounded-2xl shadow-xl text-primary"
+        className="fixed top-6 left-6 z-[60] md:hidden p-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-xl text-primary"
       >
         {isMobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
       </button>
@@ -73,7 +72,7 @@ export function Sidebar({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsMobileOpen(false)}
-            className="fixed inset-0 bg-background/60 backdrop-blur-sm z-40 md:hidden"
+            className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 md:hidden"
           />
         )}
       </AnimatePresence>
@@ -83,7 +82,7 @@ export function Sidebar({
         animate={{ width: isMobileOpen ? "100%" : (isCollapsed ? 100 : 320) }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
         className={cn(
-          "fixed inset-y-0 left-0 h-screen sidebar-glass flex flex-col py-4 sm:py-8 px-3 sm:px-4 z-50 overflow-hidden transition-colors duration-300",
+          "fixed inset-y-0 left-0 h-screen sidebar-glass flex flex-col py-4 sm:py-8 px-3 sm:px-4 z-50 overflow-hidden transition-colors duration-300 border-r border-border",
           isMobileOpen ? "translate-x-0 w-full" : "-translate-x-full md:translate-x-0"
         )}
       >
@@ -106,65 +105,53 @@ export function Sidebar({
         </div>
 
         {/* Navigation */}
-        <nav className="space-y-1 mb-4 sm:mb-6 shrink-0 overflow-y-auto overflow-x-hidden pr-1 custom-scrollbar">
+        <nav className="space-y-2 mb-4 sm:mb-6 flex-1 overflow-y-auto overflow-x-hidden pr-1 custom-scrollbar">
           {menuItems.map((item) => (
             <button
               key={item.id}
               onClick={() => handleTabChange(item.id)}
               className={cn(
-                "w-full flex items-center rounded-xl sm:rounded-2xl transition-all group relative py-2.5 sm:py-3",
+                "w-full flex items-center rounded-xl sm:rounded-2xl transition-all group relative py-3 sm:py-4",
                 activeTab === item.id 
-                  ? "nav-item-active" 
+                  ? "nav-item-active shadow-lg shadow-primary/10" 
                   : "hover:bg-primary/5 text-muted-foreground hover:text-foreground",
-                isCollapsed && !isMobileOpen ? "justify-center px-0" : "px-3 sm:px-4 gap-3 sm:gap-4"
+                isCollapsed && !isMobileOpen ? "justify-center px-0" : "px-3 sm:px-5 gap-3 sm:gap-4"
               )}
             >
               <item.icon className={cn(
-                "w-4 h-4 sm:w-5 sm:h-5 shrink-0 transition-all", 
-                activeTab === item.id ? "text-background" : "group-hover:scale-110",
-                (isCollapsed && !isMobileOpen) && "w-6 h-6"
+                "w-5 h-5 sm:w-6 sm:h-6 shrink-0 transition-all", 
+                activeTab === item.id ? "text-background" : "group-hover:scale-110 group-hover:text-primary",
+                (isCollapsed && !isMobileOpen) && "w-7 h-7"
               )} />
               
               {(!isCollapsed || isMobileOpen) && (
-                <span className="font-black text-[11px] sm:text-xs uppercase tracking-[0.2em]">
+                <span className="font-black text-xs sm:text-sm uppercase tracking-widest">
                   {item.label}
                 </span>
               )}
             </button>
           ))}
-        </nav>
-
-        {/* Dynamic Spectrum Zone */}
-        <div className={cn(
-          "flex-1 min-h-0 flex flex-col border-t border-border/10 pt-4 sm:pt-6 mb-4 sm:mb-6 transition-all duration-500",
-          isCollapsed && !isMobileOpen ? "opacity-0 invisible pointer-events-none" : "opacity-100 visible"
-        )}>
-          {user && agenda && (
-            <div className="flex flex-col h-full overflow-hidden">
-              <div className="flex items-center gap-2 px-2 mb-3 sm:mb-4 shrink-0">
-                <PieChart className="w-3.5 h-3.5 text-primary" />
-                <h4 className="text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] text-muted-foreground/60">Daily_Spectrum</h4>
-              </div>
-              <div className="flex-1 min-h-0 overflow-hidden flex flex-col p-3 sm:p-5 bg-primary/5 rounded-[1.5rem] sm:rounded-[2.5rem] border border-primary/10 shadow-inner">
-                <DailySpectrumWidget user={user} agenda={agenda} size="sm" />
-              </div>
+          
+          {(!isCollapsed || isMobileOpen) && user && agenda && (
+            <div className="mt-8 mb-4 px-2">
+              <DailySpectrumWidget user={user} agenda={agenda} size="sm" />
             </div>
           )}
-        </div>
+        </nav>
 
         {/* Footer */}
-        <div className="mt-auto border-t border-border/10 pt-4 sm:pt-6 space-y-0.5 sm:space-y-1 shrink-0">
+        <div className="mt-auto border-t border-border/50 pt-4 sm:pt-6 space-y-2 shrink-0">
           <a 
             href="https://github.com/hammaadworks/habit_bank" 
             target="_blank" 
             rel="noopener noreferrer"
             className={cn(
-              "w-full flex items-center rounded-xl sm:rounded-2xl text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all group py-2.5 sm:py-3",
-              isCollapsed && !isMobileOpen ? "justify-center px-0" : "px-3 sm:px-4 gap-3 sm:gap-4"
+              "w-full flex items-center rounded-xl sm:rounded-2xl text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all group py-3 sm:py-4",
+              isCollapsed && !isMobileOpen ? "justify-center px-0" : "px-3 sm:px-5 gap-3 sm:gap-4"
             )}
           >
-            <Star className={cn("w-4 h-4 sm:w-5 sm:h-5 shrink-0 transition-transform group-hover:rotate-12", (isCollapsed && !isMobileOpen) && "w-6 h-6")} />
-            {(!isCollapsed || isMobileOpen) && <span className="font-black text-[11px] uppercase tracking-widest">GitHub</span>}
+            <Star className={cn("w-5 h-5 sm:w-6 sm:h-6 shrink-0 transition-transform group-hover:rotate-12", (isCollapsed && !isMobileOpen) && "w-7 h-7")} />
+            {(!isCollapsed || isMobileOpen) && <span className="font-black text-xs sm:text-sm uppercase tracking-widest">GitHub</span>}
           </a>
 
           <button 
@@ -173,12 +160,12 @@ export function Sidebar({
               setIsMobileOpen(false);
             }}
             className={cn(
-              "w-full flex items-center rounded-xl sm:rounded-2xl text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all group py-2.5 sm:py-3",
-              isCollapsed && !isMobileOpen ? "justify-center px-0" : "px-3 sm:px-4 gap-3 sm:gap-4"
+              "w-full flex items-center rounded-xl sm:rounded-2xl text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all group py-3 sm:py-4",
+              isCollapsed && !isMobileOpen ? "justify-center px-0" : "px-3 sm:px-5 gap-3 sm:gap-4"
             )}
           >
-            <MessageSquare className={cn("w-4 h-4 sm:w-5 sm:h-5 shrink-0 transition-transform group-hover:scale-110", (isCollapsed && !isMobileOpen) && "w-6 h-6")} />
-            {(!isCollapsed || isMobileOpen) && <span className="font-black text-[11px] uppercase tracking-widest">Feedback</span>}
+            <MessageSquare className={cn("w-5 h-5 sm:w-6 sm:h-6 shrink-0 transition-transform group-hover:scale-110", (isCollapsed && !isMobileOpen) && "w-7 h-7")} />
+            {(!isCollapsed || isMobileOpen) && <span className="font-black text-xs sm:text-sm uppercase tracking-widest">Feedback</span>}
           </button>
 
           <button 
@@ -187,12 +174,12 @@ export function Sidebar({
               setIsMobileOpen(false);
             }}
             className={cn(
-              "w-full flex items-center rounded-xl sm:rounded-2xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all group py-2.5 sm:py-3",
-              isCollapsed && !isMobileOpen ? "justify-center px-0" : "px-3 sm:px-4 gap-3 sm:gap-4"
+              "w-full flex items-center rounded-xl sm:rounded-2xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all group py-3 sm:py-4",
+              isCollapsed && !isMobileOpen ? "justify-center px-0" : "px-3 sm:px-5 gap-3 sm:gap-4"
             )}
           >
-            <LogOut className={cn("w-4 h-4 sm:w-5 sm:h-5 shrink-0 transition-transform group-hover:-translate-x-1", (isCollapsed && !isMobileOpen) && "w-6 h-6")} />
-            {(!isCollapsed || isMobileOpen) && <span className="font-black text-[11px] uppercase tracking-widest">Logout</span>}
+            <LogOut className={cn("w-5 h-5 sm:w-6 sm:h-6 shrink-0 transition-transform group-hover:-translate-x-1", (isCollapsed && !isMobileOpen) && "w-7 h-7")} />
+            {(!isCollapsed || isMobileOpen) && <span className="font-black text-xs sm:text-sm uppercase tracking-widest">Logout</span>}
           </button>
         </div>
 
