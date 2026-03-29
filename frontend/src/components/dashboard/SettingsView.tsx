@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { User as UserIcon, Settings as SettingsIcon, Clock, Trash2, CheckCircle2, Plus, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { User as UserIcon, Settings as SettingsIcon, Clock, Trash2, CheckCircle2, Plus, X, Bot } from "lucide-react";
 import { TimezoneSetting } from "@/components/dashboard/TimezoneSetting";
 import { fetchApi } from "@/lib/api";
 import { User } from "@/types";
@@ -26,12 +26,99 @@ export function SettingsView({
   const [newBufferMins, setNewBufferMins] = useState("");
   const [newBufferUnit, setNewBufferUnit] = useState("mins");
   const [editingBufferName, setEditingBufferName] = useState<string | null>(null);
+  
+  // AI Settings State
+  const [aiProvider, setAiProvider] = useState("openai");
+  const [aiKey, setAiKey] = useState("");
+  const [aiModel, setAiModel] = useState("");
+  const [aiUrl, setAiUrl] = useState("");
+  const [aiSaved, setAiSaved] = useState(false);
+
+  useEffect(() => {
+    setAiProvider(localStorage.getItem("habitbank_ai_provider") || "openai");
+    setAiKey(localStorage.getItem("habitbank_ai_key") || "");
+    setAiModel(localStorage.getItem("habitbank_ai_model") || "");
+    setAiUrl(localStorage.getItem("habitbank_ai_url") || "");
+  }, []);
+
+  const saveAiSettings = () => {
+    localStorage.setItem("habitbank_ai_provider", aiProvider);
+    localStorage.setItem("habitbank_ai_key", aiKey);
+    localStorage.setItem("habitbank_ai_model", aiModel);
+    localStorage.setItem("habitbank_ai_url", aiUrl);
+    setAiSaved(true);
+    setTimeout(() => setAiSaved(false), 3000);
+  };
 
   return (
     <div className="max-w-3xl space-y-12">
       <h2 className="text-3xl font-black uppercase tracking-tight font-heading">Core Configuration</h2>
       
       <div className="space-y-8">
+        <section className="p-8 bg-card border border-border rounded-[2.5rem] space-y-6 shadow-2xl">
+          <div className="flex items-center gap-4">
+            <div className="p-4 bg-primary/10 rounded-2xl">
+              <Bot className="w-8 h-8 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-xl font-black uppercase tracking-tight font-heading text-foreground">AI Configuration (BYOK)</h3>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Keys are strictly local</p>
+            </div>
+          </div>
+          
+          <div className="grid gap-6 pt-6 border-t border-border/50">
+            <div className="grid gap-2">
+              <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Provider Engine</label>
+              <select 
+                value={aiProvider} 
+                onChange={e => setAiProvider(e.target.value)} 
+                className="w-full bg-background border border-border rounded-2xl px-6 py-4 text-foreground font-black uppercase tracking-widest appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/50"
+              >
+                <option value="openai">OpenAI</option>
+                <option value="anthropic">Anthropic</option>
+                <option value="google-gla">Google Gemini</option>
+                <option value="custom">Custom / Ollama</option>
+              </select>
+            </div>
+            <div className="grid gap-2">
+              <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">API Key</label>
+              <input 
+                type="password" 
+                value={aiKey} 
+                onChange={e => setAiKey(e.target.value)} 
+                placeholder="sk-..."
+                className="w-full bg-background border border-border rounded-2xl px-6 py-4 text-foreground font-mono focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground/30"
+              />
+            </div>
+            <div className="grid gap-2">
+              <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Model Name (Optional)</label>
+              <input 
+                type="text" 
+                value={aiModel} 
+                onChange={e => setAiModel(e.target.value)} 
+                placeholder="e.g. gpt-4o, claude-3-5-sonnet-latest, llama3"
+                className="w-full bg-background border border-border rounded-2xl px-6 py-4 text-foreground font-mono focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground/30"
+              />
+            </div>
+            <div className="grid gap-2">
+              <label className="text-xs font-black text-muted-foreground uppercase tracking-widest ml-1">Base URL (Optional)</label>
+              <input 
+                type="url" 
+                value={aiUrl} 
+                onChange={e => setAiUrl(e.target.value)} 
+                placeholder="e.g. http://localhost:11434/v1"
+                className="w-full bg-background border border-border rounded-2xl px-6 py-4 text-foreground font-mono focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted-foreground/30"
+              />
+            </div>
+            <button 
+              onClick={saveAiSettings} 
+              className="mt-2 w-full sm:w-auto px-8 py-4 bg-primary text-primary-foreground font-black uppercase tracking-widest rounded-2xl hover:brightness-110 active:scale-95 transition-all"
+            >
+              {aiSaved ? "Secured Locally" : "Save Credentials"}
+            </button>
+          </div>
+        </section>
+
         <section className="p-8 bg-card border border-border rounded-3xl space-y-6">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-primary/10 rounded-xl">
