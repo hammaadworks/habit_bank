@@ -60,7 +60,7 @@ export function CreateHabitModal({
                   type="date"
                   value={formData.start_date}
                   onChange={e => setFormData({...formData, start_date: e.target.value})}
-                  className="w-full bg-white/50 border border-border rounded-2xl px-6 py-4 text-lg font-bold focus:outline-none [color-scheme:light]"
+                  className="w-full bg-background border border-border rounded-2xl px-6 py-5 text-lg font-black text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 shadow-inner [color-scheme:dark]"
                 />
               </div>
               <div className="flex items-center gap-3 mt-2 p-4 bg-white/50 border border-border rounded-2xl cursor-pointer hover:bg-white transition-all" onClick={() => setFormData({...formData, is_stacked: !formData.is_stacked})}>
@@ -80,21 +80,21 @@ export function CreateHabitModal({
         )
       },
       {
-        title: "Daily Goal",
-        description: "What's the target for this habit?",
-        isValid: formData.target_value.trim().length > 0 && !isNaN(parseFloat(formData.target_value)) && formData.target_unit.trim().length > 0,
+        title: "Target Goal",
+        description: "What's the target and frequency for this habit?",
+        isValid: formData.target_value.trim().length > 0 && !isNaN(parseFloat(formData.target_value)) && formData.target_unit.trim().length > 0 && formData.frequency_count > 0,
         content: (
           <div className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <label className="text-xs font-black uppercase tracking-widest text-primary ml-1">Value</label>
+                <label className="text-xs font-black uppercase tracking-widest text-primary ml-1">Target per occurence</label>
                 <input 
                   type="number"
                   step="any"
                   autoFocus
                   value={formData.target_value}
                   onChange={e => setFormData({...formData, target_value: e.target.value})}
-                  className="w-full bg-white/50 border border-border rounded-2xl px-6 py-4 text-3xl font-black font-heading focus:outline-none"
+                  className="w-full bg-background border border-border rounded-2xl px-6 py-5 text-3xl font-black font-heading text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 shadow-inner"
                 />
               </div>
               <div className="grid gap-2">
@@ -104,6 +104,30 @@ export function CreateHabitModal({
                   value={formData.target_unit}
                   onChange={val => setFormData({...formData, target_unit: val})}
                   placeholder="e.g. pages, juz, pushups..."
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border/50">
+              <div className="grid gap-2">
+                <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Frequency</label>
+                <select
+                  value={formData.frequency_type}
+                  onChange={e => setFormData({...formData, frequency_type: e.target.value})}
+                  className="w-full bg-background border border-border rounded-2xl px-4 py-4 text-sm font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 shadow-inner appearance-none cursor-pointer"
+                >
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                </select>
+              </div>
+              <div className="grid gap-2">
+                <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Times per {formData.frequency_type.replace('ly', '')}</label>
+                <input 
+                  type="number"
+                  min="1"
+                  value={formData.frequency_count}
+                  onChange={e => setFormData({...formData, frequency_count: parseInt(e.target.value) || 1})}
+                  className="w-full bg-background border border-border rounded-2xl px-4 py-4 text-xl font-black font-heading text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 shadow-inner"
                 />
               </div>
             </div>
@@ -141,7 +165,7 @@ export function CreateHabitModal({
                   newDefs[i].multiplier = val === "" ? 0 : parseFloat(val);
                   setUnitDefinitions(newDefs);
                 }}
-                className="w-full bg-white/50 border border-border rounded-2xl px-6 py-4 text-2xl font-black font-heading focus:outline-none"
+                className="w-full bg-background border border-border rounded-2xl px-6 py-5 text-3xl font-black font-heading text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 shadow-inner"
               />
             </div>
             <div className="grid gap-2">
