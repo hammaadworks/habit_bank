@@ -32,7 +32,9 @@ export function useCreateHabit(userId: string, onCreated: () => void) {
     target_value: "1",
     target_unit: "",
     start_date: new Date().toISOString().split('T')[0],
-    is_stacked: false
+    is_stacked: false,
+    frequency_type: "daily",
+    frequency_count: 1
   });
 
   const [unitDefinitions, setUnitDefinitions] = useState<UnitDefinition[]>([]);
@@ -63,7 +65,9 @@ export function useCreateHabit(userId: string, onCreated: () => void) {
           mark_off_unit: formData.target_unit,
           color: formData.color,
           unit_hierarchy: hierarchy,
-          start_date: formData.start_date
+          start_date: formData.start_date,
+          frequency_type: formData.frequency_type,
+          frequency_count: formData.frequency_count
         })
       });
 

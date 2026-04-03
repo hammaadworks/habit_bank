@@ -55,7 +55,7 @@ export function HabitLogForm({
               <select
                 value={logUnit}
                 onChange={e => setLogUnit(e.target.value)}
-                className="w-full bg-background border border-border rounded-xl px-3 sm:px-4 py-3 sm:py-4 text-base sm:text-xl font-bold font-heading focus:outline-none focus:ring-2 focus:ring-primary/20 [color-scheme:light] appearance-none"
+                className="w-full bg-background border border-border rounded-2xl px-6 py-5 text-xl font-black font-heading text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 shadow-inner [color-scheme:dark] appearance-none cursor-pointer"
               >
                 {availableUnits.map(u => (
                   <option key={u} value={u}>{u.toUpperCase()}</option>
@@ -76,7 +76,6 @@ export function HabitLogForm({
       isSubmitting={status === "submitting"}
       submitLabel="Log Session"
       cancelLabel="Close"
-      minHeight="200px"
     />
   );
 }

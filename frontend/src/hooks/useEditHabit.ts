@@ -28,7 +28,9 @@ export function useEditHabit(habit: AgendaItem, onUpdated: () => void) {
     is_stacked: habit.is_stacked || false,
     base_unit_name: habit.base_unit_name,
     mark_off_unit: habit.mark_off_unit,
-    color: habit.color || PRESET_COLORS[0]
+    color: habit.color || PRESET_COLORS[0],
+    frequency_type: habit.frequency_type || "daily",
+    frequency_count: habit.frequency_count || 1
   });
 
   const [hierarchy, setHierarchy] = useState(habit.unit_hierarchy);
@@ -67,7 +69,9 @@ export function useEditHabit(habit: AgendaItem, onUpdated: () => void) {
         name: formData.name,
         color: formData.color,
         is_stacked: formData.is_stacked,
-        unit_hierarchy: hierarchy
+        unit_hierarchy: hierarchy,
+        frequency_type: formData.frequency_type,
+        frequency_count: formData.frequency_count
       };
 
       if (!isNaN(priority)) payload.priority = priority;

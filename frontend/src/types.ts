@@ -24,6 +24,8 @@ export type AgendaItem = {
   display_unit?: string;
   mark_off_unit: string;
   is_stacked?: boolean;
+  frequency_type?: string;
+  frequency_count?: number;
 };
 
 export type DashboardAgenda = {
