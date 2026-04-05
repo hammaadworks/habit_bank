@@ -53,16 +53,17 @@ class HabitBase(SQLModel):
     start_date: date = Field(default_factory=lambda: datetime.now(timezone.utc).date())
     base_unit_name: str = Field(default="seconds", description="The smallest unit for tracking this habit.")
     unit_hierarchy: dict = Field(
-        default_factory=dict, 
+        default_factory=dict,
         sa_column=Column(JSON),
         description="Defines conversion rates between different units (e.g., {'minutes': {'seconds': 60}})."
     )
     mark_off_unit: str = Field(description="The primary unit used for logging progress.")
     display_unit: Optional[str] = Field(default=None, description="The unit preferred for UI display.")
     color: Optional[str] = Field(default=None, description="A hex color code for UI theming.")
+    frequency_type: str = Field(default="daily", description="Frequency type: daily, weekly, monthly.")
+    frequency_count: int = Field(default=1, description="Number of times per frequency period.")
 
-class Habit(HabitBase, table=True):
-    """Represents a habit in the database, linked to a user."""
+class Habit(HabitBase, table=True):    """Represents a habit in the database, linked to a user."""
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
 
     user: User = Relationship(back_populates="habits")
@@ -146,6 +147,8 @@ class HabitUpdate(BaseModel):
     mark_off_unit: Optional[str] = None
     display_unit: Optional[str] = None
     color: Optional[str] = None
+    frequency_type: Optional[str] = None
+    frequency_count: Optional[int] = None
 
 class HabitRead(HabitBase):
     """Schema for reading a habit's data."""

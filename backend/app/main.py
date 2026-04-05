@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import SQLModel
 
 from app.database import engine
-from app.routers import habits, dashboard, users, waitlist, testimonials, feedback, admin
+from app.routers import habits, dashboard, users, waitlist, testimonials, feedback, admin, chat
 from app.core.logger import setup_logging, set_debug_level
 from app.core.deeplogger import set_deep_logging
 
@@ -54,6 +54,7 @@ app.add_middleware(
 )
 
 # Include modular routers for different parts of the API
+app.include_router(chat.router)
 app.include_router(habits.router)
 app.include_router(dashboard.router)
 app.include_router(users.router)
