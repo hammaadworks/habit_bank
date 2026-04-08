@@ -82,24 +82,15 @@ class TemporalSnapshot(BaseModel):
     habits: List[HistoricalHabitState]
 
 @router.get("/agenda", response_model=DashboardAgenda)
-def get_dashboard_agenda(session: SessionDep, user_id: Optional[uuid.UUID] = None):
+def generate_daily_agenda_snapshot(session: SessionDep, user_id: Optional[uuid.UUID] = None):
     """
-    Generates and returns the dashboard agenda for a given user.
-
-    This endpoint fetches all habits for the specified user, calculates their
-    current state using the LedgerEngine, and then categorizes them into
-    three tiers for the dashboard display.
-
-    Args:
-        session (SessionDep): The database session dependency.
-        user_id (Optional[uuid.UUID]): The ID of the user to generate the
-            agenda for. If not provided, returns agenda for all users (quota might be inaccurate).
-
-    Returns:
-        DashboardAgenda: The categorized and sorted list of habits for the
-            dashboard.
+    Synthesizes a high-fidelity temporal snapshot of the user's habits.
+    
+    This engine fetches all active protocols, runs the Waterfall Allocation 
+    algorithm via the LedgerEngine, and categorizes habits into urgency-based 
+    tiers (Deficit, Debt, and Secured).
     """
-    logger.info(f"Generating dashboard agenda for user {user_id}")
+    logger.info(f"Synthesizing agenda snapshot for user {user_id}")
     statement = select(Habit)
     if user_id:
         statement = statement.where(Habit.user_id == user_id)

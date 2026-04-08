@@ -40,16 +40,17 @@ app = FastAPI(
 )
 
 # Configure Cross-Origin Resource Sharing (CORS)
-# This allows the frontend (running on a different domain/port) to communicate
-# with this API. The current configuration is permissive and allows all origins,
-# methods, and headers, which is suitable for development but should be
-# restricted in a production environment.
+origins = [
+    "http://localhost:3000",
+    "https://hammaadworks.github.io",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods
-    allow_headers=["*"],  # Allows all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Include modular routers for different parts of the API

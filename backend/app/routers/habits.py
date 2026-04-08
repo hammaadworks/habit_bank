@@ -28,9 +28,7 @@ from app.models import (
     HabitStateRead,
 )
 from app.core.time_utils import get_current_logical_date
-# TODO: Add docstrings to the UnitConverter module and its methods.
 from app.core.unit_converter import UnitConverter
-# TODO: Add docstrings to the LedgerEngine module and its methods.
 from app.core.ledger_engine import LedgerEngine
 from app.core.logger import get_logger
 
@@ -38,26 +36,15 @@ logger = get_logger(__name__)
 
 router = APIRouter(prefix="/habits", tags=["habits"])
 
-# --- Habit State Endpoint ---
+# --- Habit Metrics Endpoint ---
 
 @router.get("/{habit_id}/state", response_model=HabitStateRead)
-def read_habit_state(habit_id: uuid.UUID, session: SessionDep):
+def get_habit_performance_metrics(habit_id: uuid.UUID, session: SessionDep):
     """
-    Calculates and retrieves the current state of a single habit.
+    Calculates deep-performance metrics for a specific protocol.
 
-    This endpoint uses the LedgerEngine to compute a detailed analysis of the
-    habit's performance, including current deficit, historical debt, and a
-    projected timeline.
-
-    Args:
-        habit_id (uuid.UUID): The ID of the habit to analyze.
-        session (SessionDep): The database session dependency.
-
-    Raises:
-        HTTPException: If the habit is not found.
-
-    Returns:
-        HabitStateRead: The calculated state of the habit.
+    Uses the LedgerEngine to analyze historical logs and project 
+    future solvency based on current debt velocity.
     """
     habit = session.get(Habit, habit_id)
     if not habit:
