@@ -57,14 +57,15 @@ def get_habit_performance_metrics(habit_id: uuid.UUID, session: SessionDep):
     logs = session.exec(select(HabitLog).where(HabitLog.habit_id == habit_id)).all()
     
     result = LedgerEngine.calculate_timeline(
-        habit.start_date, 
-        today, 
-        list(phases), 
+        habit.start_date,
+        today,
+        list(phases),
         list(logs),
         fill_direction=user.fill_direction if user else "start_date",
-        is_stacked=habit.is_stacked
-    )
-    analytics = LedgerEngine.calculate_analytics(result, today)
+        is_stacked=habit.is_stacked,
+        frequency_type=habit.frequency_type,
+        frequency_count=habit.frequency_count
+    )    analytics = LedgerEngine.calculate_analytics(result, today)
     
     return HabitStateRead(
         habit_id=habit_id,

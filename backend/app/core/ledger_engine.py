@@ -32,11 +32,22 @@ class LedgerEngine:
         phases: List[TargetPhase],
         logs: List[HabitLog],
         fill_direction: str = "start_date",
-        is_stacked: bool = True
+        is_stacked: bool = True,
+        frequency_type: str = "daily",
+        frequency_count: int = 1
     ) -> LedgerResult:
-        logger.info(f"Calculating timeline: start={start_date}, today={today}, phases={len(phases)}, logs={len(logs)}, stacked={is_stacked}")
+        logger.info(f"Calculating timeline: start={start_date}, today={today}, phases={len(phases)}, logs={len(logs)}, stacked={is_stacked}, freq={frequency_type}x{frequency_count}")
         # Sort phases by start date to ensure chronology
         phases = sorted(phases, key=lambda p: p.start_date)
+        
+        # Determine target multiplier based on frequency
+        target_multiplier = 1.0
+        if frequency_type == "weekly":
+            target_multiplier = frequency_count / 7.0
+        elif frequency_type == "monthly":
+            target_multiplier = frequency_count / 30.4375
+        else: # daily
+            target_multiplier = float(frequency_count)
         
         # 1. Build array of days based on start_date -> today
         timeline: List[TimelineDay] = []
@@ -52,7 +63,7 @@ class LedgerEngine:
                 if phase.start_date <= d:
                     if phase.end_date is None or d <= phase.end_date:
                         active_target = phase.target_value
-            return float(active_target)
+            return float(active_target) * target_multiplier
 
         while current_date <= today:
             target = get_target_for_date(current_date)

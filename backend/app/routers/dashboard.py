@@ -91,46 +91,59 @@ def generate_daily_agenda_snapshot(session: SessionDep, user_id: Optional[uuid.U
     tiers (Deficit, Debt, and Secured).
     """
     logger.info(f"Synthesizing agenda snapshot for user {user_id}")
-    statement = select(Habit)
-    if user_id:
-        statement = statement.where(Habit.user_id == user_id)
-    
-    habits = session.exec(statement).all()
     
     # Retrieve user for preferences
     user = session.get(User, user_id) if user_id else None
     from app.core.time_utils import get_current_logical_date
     today = get_current_logical_date(user) if user else datetime.now(timezone.utc).date()
-    
     fill_direction = user.fill_direction if user else "start_date"
     
+    statement = select(Habit)
+    if user_id:
+        statement = statement.where(Habit.user_id == user_id)
+    habits = session.exec(statement).all()
+    habit_ids = [h.id for h in habits]
+    
+    # Batch fetch phases and logs
+    phases_by_habit = {h_id: [] for h_id in habit_ids}
+    logs_by_habit = {h_id: [] for h_id in habit_ids}
+    
+    if habit_ids:
+        all_phases = session.exec(select(TargetPhase).where(TargetPhase.habit_id.in_(habit_ids))).all()
+        for p in all_phases:
+            phases_by_habit[p.habit_id].append(p)
+            
+        all_logs = session.exec(select(HabitLog).where(HabitLog.habit_id.in_(habit_ids))).all()
+        for l in all_logs:
+            logs_by_habit[l.habit_id].append(l)
+
     tier1_items = []
     tier2_items = []
     completed_items = []
-    
     total_habit_time_seconds = 0
     
     for habit in habits:
-        # Fetch all related data for the LedgerEngine calculation
-        phases = session.exec(select(TargetPhase).where(TargetPhase.habit_id == habit.id)).all()
-        logs = session.exec(select(HabitLog).where(HabitLog.habit_id == habit.id)).all()
+        phases = phases_by_habit[habit.id]
+        logs = logs_by_habit[habit.id]
         
         # The LedgerEngine performs the core business logic of calculating the
         # habit's state over time.
         logger.debug(f"Calculating state for habit '{habit.name}' ({habit.id})")
         result = LedgerEngine.calculate_timeline(
-            habit.start_date, 
-            today, 
-            list(phases), 
-            list(logs), 
-            fill_direction=fill_direction,
-            is_stacked=habit.is_stacked
+            habit.start_date,
+            today,
+            phases,
+            logs,
+            fill_direction=user.fill_direction,
+            is_stacked=habit.is_stacked,
+            frequency_type=habit.frequency_type,
+            frequency_count=habit.frequency_count
         )
-        analytics = LedgerEngine.calculate_analytics(result, today, list(logs), user.timezone_offset if user else 0)
+        analytics = LedgerEngine.calculate_analytics(result, today, logs, user.timezone_offset if user else 0)
         
         # Calculate daily target in seconds for quota
         active_phase = next((p for p in phases if p.start_date <= today and (p.end_date is None or p.end_date >= today)), None)
-        if active_phase:
+        if active_phase and not habit.is_stacked:
             total_habit_time_seconds += active_phase.target_value
 
         item = AgendaItem(
@@ -173,11 +186,9 @@ def generate_daily_agenda_snapshot(session: SessionDep, user_id: Optional[uuid.U
     
     # Calculate Quota
     daily_quota_remaining_seconds = 86400 - total_habit_time_seconds
-    if user_id:
-        user = session.get(User, user_id)
-        if user and user.daily_buffers:
-            buffer_seconds = sum(user.daily_buffers.values())
-            daily_quota_remaining_seconds -= buffer_seconds
+    if user and user.daily_buffers:
+        buffer_seconds = sum(user.daily_buffers.values())
+        daily_quota_remaining_seconds -= buffer_seconds
 
     return DashboardAgenda(
         tier1=tier1_items,
@@ -208,7 +219,15 @@ def get_temporal_snapshot(date_str: str, session: SessionDep, user_id: Optional[
         
         # Calculate timeline up to today (or target_date if target_date > today, but usually it's past)
         calc_until = max(today, target_date)
-        result = LedgerEngine.calculate_timeline(habit.start_date, calc_until, list(phases), list(logs))
+        result = LedgerEngine.calculate_timeline(
+            habit.start_date, 
+            calc_until, 
+            list(phases), 
+            list(logs),
+            is_stacked=habit.is_stacked,
+            frequency_type=habit.frequency_type,
+            frequency_count=habit.frequency_count
+        )
         
         # Find the specific day in the timeline
         day_data = next((d for d in result.timeline if d.date == date_str), None)
