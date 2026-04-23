@@ -1,24 +1,21 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Plus } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { Sidebar } from "@/components/Sidebar";
-import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { UserSelector } from "@/components/UserSelector";
 import { CreateHabitModal } from "@/components/CreateHabitModal";
 import { EditHabitModal } from "@/components/EditHabitModal";
 import { DailyBreakdownModal } from "@/components/DailyBreakdownModal";
-import { AnalyticsDashboard } from "@/components/AnalyticsDashboard";
 import { DashboardView } from "@/components/dashboard/DashboardView";
-import { HabitsView } from "@/components/dashboard/HabitsView";
 import { SettingsView } from "@/components/dashboard/SettingsView";
+import { AssistantChat } from "@/components/AssistantChat";
+import { AnalyticsDashboard } from "@/components/AnalyticsDashboard";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useUser } from "@/hooks/useUser";
 import { useAgenda } from "@/hooks/useAgenda";
 import { getLogicalDate } from "@/lib/utils";
-import { Zap } from "lucide-react";
 import { AgendaItem } from "@/types";
 import { Logo } from "@/components/Logo";
 
@@ -35,16 +32,15 @@ export default function DashboardPage() {
     agenda, 
     loading: agendaLoading, 
     fetchAgenda, 
-    allHabits, 
     recommendations 
   } = useAgenda(activeUser?.id);
 
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [analyticsSelectedId, setAnalyticsSelectedId] = useState<string>("global");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isBreakdownModalOpen, setIsBreakdownModalOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState<AgendaItem | null>(null);
   const [timeTravelDate, setTimeTravelDate] = useState<Date | null>(null);
-  const [selectedAnalyticsHabitId, setSelectedAnalyticsHabitId] = useState<string>("global");
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   const logicalToday = useMemo(() => {
@@ -71,9 +67,6 @@ export default function DashboardPage() {
     );
   }
 
-  const quotaSeconds = agenda?.daily_quota_remaining_seconds || 0;
-  const quotaPercent = Math.max(0, Math.min(100, (agenda?.daily_quota_remaining_seconds || 0) / 86400 * 100));
-
   return (
     <div className="flex min-h-screen bg-background text-foreground overflow-x-hidden">
       <Header 
@@ -98,7 +91,7 @@ export default function DashboardPage() {
           setActiveTab("dashboard");
         }}
         onSelectAnalytics={(id) => {
-          setSelectedAnalyticsHabitId(id);
+          setAnalyticsSelectedId(id);
           setActiveTab("analytics");
         }}
         logicalToday={logicalToday}
@@ -118,29 +111,25 @@ export default function DashboardPage() {
               logicalToday={logicalToday}
               setActiveTab={setActiveTab}
               onViewAnalytics={(id) => {
-                setSelectedAnalyticsHabitId(id);
+                setAnalyticsSelectedId(id);
                 setActiveTab("analytics");
               }}
             />
           )}
 
-          {activeTab === "habits" && agenda && (
-            <HabitsView 
-              agenda={agenda}
-              allHabits={allHabits}
-              setIsCreateModalOpen={setIsCreateModalOpen}
-              setEditingHabit={setEditingHabit}
-              quotaSeconds={quotaSeconds}
-              quotaPercent={quotaPercent}
+          {activeTab === "analytics" && agenda && activeUser && (
+            <AnalyticsDashboard 
+              allHabits={[...agenda.tier1, ...agenda.tier2, ...agenda.completed]}
+              selectedId={analyticsSelectedId}
+              onSelectId={setAnalyticsSelectedId}
+              logicalToday={logicalToday}
             />
           )}
 
-          {activeTab === "analytics" && (
-            <AnalyticsDashboard 
-              allHabits={allHabits} 
-              selectedId={selectedAnalyticsHabitId} 
-              onSelectId={setSelectedAnalyticsHabitId} 
-              logicalToday={logicalToday}
+          {activeTab === "assistant" && activeUser && agenda && (
+            <AssistantChat 
+              activeUser={activeUser}
+              agenda={agenda}
             />
           )}
 
